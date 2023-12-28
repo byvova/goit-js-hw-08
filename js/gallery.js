@@ -68,49 +68,46 @@ const images = [
 
 const gallery = document.querySelector('.gallery');
 
-gallery.style.display = "flex";
-gallery.style.flexWrap = "wrap";
-gallery.style.gap = "24px";
-gallery.style.listStyleType = "none";
 
-gallery.innerHTML = images.reduce((html, images) => html + `
+gallery.innerHTML = images.reduce((html, image) => html + `
 	<li class="gallery-item">
-    <a class="gallery-link" href="./#">
+    <a class="gallery-link" href="${image.original}">
     <img
         class="gallery-image"
-        src="${images.preview}"
-        data-source="${images.original}"
-        alt="${images.preview}"
+        src="${image.preview}"
+        data-source="${image.original}"
+        alt="${image.description}"
     />
     </a>
 </li> 
-`)
-
+`, "");
 
 gallery.addEventListener('click', (event) => {
-    const galleryId = event.target.dataset.source;
-    console.log(galleryId)
+    event.preventDefault();
+    const clickedElement = event.target;
+    if (clickedElement.tagName === 'IMG') {
+        const galleryId = clickedElement.dataset.source;
+        const image = images.find(img => img.original === galleryId);
 
-    if (!galleryId) return;
-    const image = images.find(image => image.original === galleryId)
+        const myModal = basicLightbox.create(`
+        <div class="modal">
+            <img
+            class="modal-image"
+            src="${galleryId}"
+            alt="${image.description}"
+        />
+        </div>
+        `);
 
-    const myModal = basicLightbox.create(`
-    <div class="modal">
-        <img
-        class="gallery-image"
-        src="${galleryId}"
-        alt="${images.preview}"
-    />
-    </div>
-`)
+        myModal.show();
 
-    myModal.show()
-    const handleEscape = (e) => {
-    if (e.key === 'Escape') {
-        myModal.close();
-        document.removeEventListener('keydown', handleEscape);
+        const handleEscape = (e) => {
+            if (e.key === 'Escape') {
+                myModal.close();
+                document.removeEventListener('keydown', handleEscape);
+            }
+        };
+
+        document.addEventListener('keydown', handleEscape);
     }
-    };
-
-    document.addEventListener('keydown', handleEscape);
 });
